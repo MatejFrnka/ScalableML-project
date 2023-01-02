@@ -219,7 +219,7 @@ def calculate_last_ftr_feature(df):
 
 
 
-def calculate_mmr_feature(df, draw_probability=0.265):
+def calculate_mmr_feature(df, draw_probability=0.265, home_advantage = 1.3):
   teams = np.unique(np.array(df.H_team.tolist() + df.A_team.tolist()))
 
   trueSkill_env = TrueSkill(draw_probability=draw_probability)
@@ -238,8 +238,11 @@ def calculate_mmr_feature(df, draw_probability=0.265):
     a_team = df.iloc[i]['A_team']
 
     # Update the mmr lists
-    h_trueskill = trueSkill_dict[h_team]
-    a_trueskill = trueSkill_dict[a_team]
+    og_h_trueskill = trueSkill_dict[h_team]
+    og_a_trueskill = trueSkill_dict[a_team]
+
+    h_trueskill = Rating(og_h_trueskill.mu + home_advantage, og_h_trueskill.sigma)
+    a_trueskill = og_a_trueskill
 
     h_mmr.append(h_trueskill.mu)
     a_mmr.append(a_trueskill.mu)
@@ -250,15 +253,15 @@ def calculate_mmr_feature(df, draw_probability=0.265):
 
     # If home won
     if fthg > ftag:
-      h_trueskill, a_trueskill = trueSkill_env.rate_1vs1(h_trueskill, a_trueskill, drawn=False)
+      new_h_trueskill, a_trueskill = trueSkill_env.rate_1vs1(h_trueskill, a_trueskill, drawn=False)
     # If away won
     elif ftag > fthg:
-      a_trueskill, h_trueskill = trueSkill_env.rate_1vs1(a_trueskill, h_trueskill, drawn=False)
+      a_trueskill, new_h_trueskill = trueSkill_env.rate_1vs1(a_trueskill, h_trueskill, drawn=False)
     # Draw
     else:
-      h_trueskill, a_trueskill = trueSkill_env.rate_1vs1(h_trueskill, a_trueskill, drawn=True)
+      new_h_trueskill, a_trueskill = trueSkill_env.rate_1vs1(h_trueskill, a_trueskill, drawn=True)
 
-    trueSkill_dict[h_team] = h_trueskill
+    trueSkill_dict[h_team] = Rating(og_h_trueskill.mu + (new_h_trueskill.mu - h_trueskill.mu), new_h_trueskill.sigma)
     trueSkill_dict[a_team] = a_trueskill
 
   df['H_MMR'] = h_mmr
@@ -267,7 +270,7 @@ def calculate_mmr_feature(df, draw_probability=0.265):
 
 
 
-  
+
 def calculate_points_feature(df, num_matches=15):
   teams = np.unique(np.array(df.H_team.tolist() + df.A_team.tolist()))
   points_dict = {}
