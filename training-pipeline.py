@@ -4,15 +4,17 @@ from datetime import datetime, timedelta
 import hopsworks
 from keras.layers import Dropout
 from sklearn.preprocessing import MaxAbsScaler
-from consts import X_COLUMNS, FW_VERSION, FG_VERSION, Y_COLUMNS, X_SCALE_COLUMNS
+from consts import X_COLUMNS, Y_COLUMNS, X_SCALE_COLUMNS
 import tensorflow
 import pickle
 from utils.BackTest import Games, Evaluator
 from tensorflow.python.keras.layers import Dense
-from tensorflow.python.keras.models import Sequential, load_model
+from tensorflow.python.keras.models import Sequential
 import matplotlib.pyplot as plt
 from pathlib import Path
 import shutil
+
+from utils.Hopsworks import get_football_featureview
 
 tensorflow.random.set_seed(1)
 
@@ -119,15 +121,9 @@ project = hopsworks.login()
 # fs is a reference to the Hopsworks Feature Store
 fs = project.get_feature_store()
 
-try:
-    feature_view = fs.get_feature_view(name="fw_football", version=FW_VERSION)
-except:
-    fg_football = fs.get_feature_group(name="fg_football", version=FG_VERSION)
-    query = fg_football.select_all()
-    feature_view = fs.create_feature_view(name="fw_football",
-                                          version=FW_VERSION,
-                                          description="Read from football dataset",
-                                          query=query)
+# get featureview
+feature_view = get_football_featureview(fs)
+
 # no labels are set in the feature view
 train, _ = feature_view.training_data()
 evaluator = Evaluator(0.05)

@@ -1,13 +1,16 @@
 import pandas as pd
 import numpy as np
 from trueskill import TrueSkill, Rating, rate_1vs1
-
+from consts import *
+from multiprocessing import Process
 
 '''
 Add last close odds feature for each team and match
 '''
+
+
 def calculate_last_close_feature(df):
-  teams = np.unique(np.array(df.H_team.tolist() + df.A_team.tolist()))
+  teams = np.unique(np.array(df[HomeTeam].tolist() + df[AwayTeam].tolist()))
   lastOdds_dict = {}
 
   # Create lists for the 'to-be-created' columns
@@ -20,14 +23,14 @@ def calculate_last_close_feature(df):
         lastOdds_dict[(team1, team2)] = 0
         lastOdds_dict[(team2, team1)] = 0
 
-  #print(lastOdds_dict)
+  # print(lastOdds_dict)
 
   for i in range(len(df)):
-    h_team = df.iloc[i]['H_team']
-    a_team = df.iloc[i]['A_team']
+    h_team = df.iloc[i][HomeTeam]
+    a_team = df.iloc[i][AwayTeam]
 
-    hc_pinn = df.iloc[i]['HC_Pinnacle']
-    ac_pinn = df.iloc[i]['AC_Pinnacle']
+    hc_pinn = df.iloc[i][HomeCloseOdds]
+    ac_pinn = df.iloc[i][AwayCloseOdds]
 
     # Update the winstreak lists
     if lastOdds_dict[(h_team, a_team)] == 0 and lastOdds_dict[(a_team, h_team)] == 0:
@@ -37,24 +40,23 @@ def calculate_last_close_feature(df):
       h_lastOdds.append(lastOdds_dict[(h_team, a_team)])
       a_lastOdds.append(lastOdds_dict[(a_team, h_team)])
 
-
     # Update the dict for this game below :)
     lastOdds_dict[(h_team, a_team)] = hc_pinn
     lastOdds_dict[(a_team, h_team)] = ac_pinn
 
-  df['H_LastOdds'] = h_lastOdds
-  df['A_LastOdds'] = a_lastOdds
+  df[H_LastOdds] = h_lastOdds
+  df[A_LastOdds] = a_lastOdds
 
   return df
-
-
 
 
 '''
 Add win streak for each team
 '''
+
+
 def calculate_win_streak_feature(df):
-  teams = np.unique(np.array(df.H_team.tolist() + df.A_team.tolist()))
+  teams = np.unique(np.array(df[HomeTeam].tolist() + df[AwayTeam].tolist()))
   winstreak_dict = {}
 
   # Create lists for the 'to-be-created' columns
@@ -65,8 +67,8 @@ def calculate_win_streak_feature(df):
     winstreak_dict[team] = 0
 
   for i in range(len(df)):
-    h_team = df.iloc[i]['H_team']
-    a_team = df.iloc[i]['A_team']
+    h_team = df.iloc[i][HomeTeam]
+    a_team = df.iloc[i][AwayTeam]
 
     # Update the winstreak lists
     h_winstreak.append(winstreak_dict[h_team])
@@ -74,8 +76,8 @@ def calculate_win_streak_feature(df):
 
     # Update the dict for this game below :)
 
-    hg = df.iloc[i]['FTHG']
-    ag = df.iloc[i]['FTAG']
+    hg = df.iloc[i][FTHG]
+    ag = df.iloc[i][FTAG]
 
     h_prev = winstreak_dict.get(h_team)
     a_prev = winstreak_dict.get(a_team)
@@ -87,7 +89,7 @@ def calculate_win_streak_feature(df):
       if a_prev > 0:
         winstreak_dict[a_team] = -1
       else:
-        winstreak_dict[a_team] = a_prev -1
+        winstreak_dict[a_team] = a_prev - 1
 
       # Update winner
       if h_prev < 0:
@@ -102,7 +104,7 @@ def calculate_win_streak_feature(df):
       if h_prev > 0:
         winstreak_dict[h_team] = -1
       else:
-        winstreak_dict[h_team] = h_prev -1
+        winstreak_dict[h_team] = h_prev - 1
 
       # Update winner
       if a_prev < 0:
@@ -110,8 +112,8 @@ def calculate_win_streak_feature(df):
       else:
         winstreak_dict[a_team] = a_prev + 1
 
-  df['H_winstreak'] = h_winstreak
-  df['A_winstreak'] = a_winstreak
+  df[H_winstreak] = h_winstreak
+  df[A_winstreak] = a_winstreak
 
   return df
 
@@ -119,9 +121,10 @@ def calculate_win_streak_feature(df):
 '''
 Add shock feature for each team and match
 '''
-def calculate_shock_feature(df, num_matches=1, count_type='sum'):
 
-  teams = np.unique(np.array(df.H_team.tolist() + df.A_team.tolist()))
+
+def calculate_shock_feature(df, num_matches=1, count_type='sum'):
+  teams = np.unique(np.array(df[HomeTeam].tolist() + df[AwayTeam].tolist()))
   shock_dict = {}
   # Create lists for the 'to-be-created' columns
   h_shocks = []
@@ -129,10 +132,10 @@ def calculate_shock_feature(df, num_matches=1, count_type='sum'):
 
   for team in teams:
     shock_dict[team] = [0]
-  
+
   for i in range(len(df)):
-    h_team = df.iloc[i]['H_team']
-    a_team = df.iloc[i]['A_team']
+    h_team = df.iloc[i][HomeTeam]
+    a_team = df.iloc[i][AwayTeam]
 
     h_team_shocks = shock_dict[h_team]
     a_team_shocks = shock_dict[a_team]
@@ -144,17 +147,17 @@ def calculate_shock_feature(df, num_matches=1, count_type='sum'):
       h_shocks.append(h_sum)
       a_shocks.append(a_sum)
     elif count_type == 'mean':
-      h_shocks.append(h_sum/num_matches)
-      a_shocks.append(a_sum/num_matches)
+      h_shocks.append(h_sum / num_matches)
+      a_shocks.append(a_sum / num_matches)
     else:
       raise Exception("ERROR, faulty 'count_type' entered!")
 
     # Update the dict for this game below :)
-    hg = df.iloc[i]['FTHG']
-    ag = df.iloc[i]['FTAG']
+    hg = df.iloc[i][FTHG]
+    ag = df.iloc[i][FTAG]
 
-    hc_pinn = df.iloc[i]['HC_Pinnacle']
-    ac_pinn = df.iloc[i]['AC_Pinnacle']
+    hc_pinn = df.iloc[i][HomeCloseOdds]
+    ac_pinn = df.iloc[i][AwayCloseOdds]
 
     if hg == ag:
       if hc_pinn > ac_pinn:
@@ -172,18 +175,19 @@ def calculate_shock_feature(df, num_matches=1, count_type='sum'):
     # shock_dict[h_team] = (hg - ag) * (1 - hc_pinn)
     # shock_dict[a_team] = (ag - hg) * (1 - ac_pinn)
 
-  df['H_' + str(num_matches) + 'shock'] = h_shocks
-  df['A_'  + str(num_matches) + 'shock'] = a_shocks
+  df[H_shock(num_matches)] = h_shocks
+  df[A_shock(num_matches)] = a_shocks
 
-  return(df)
+  return (df)
 
-  
 
 '''
 Add FTR from last game feature for each team and match
 '''
+
+
 def calculate_last_ftr_feature(df):
-  teams = np.unique(np.array(df.H_team.tolist() + df.A_team.tolist()))
+  teams = np.unique(np.array(df[HomeTeam].tolist() + df[AwayTeam].tolist()))
   lastFTG_dict = {}
 
   # Create lists for the 'to-be-created' columns
@@ -197,8 +201,8 @@ def calculate_last_ftr_feature(df):
         lastFTG_dict[(team2, team1)] = 0
 
   for i in range(len(df)):
-    h_team = df.iloc[i]['H_team']
-    a_team = df.iloc[i]['A_team']
+    h_team = df.iloc[i][HomeTeam]
+    a_team = df.iloc[i][AwayTeam]
 
     # Update the winstreak lists
     h_lastFTG.append(lastFTG_dict[(h_team, a_team)])
@@ -206,21 +210,20 @@ def calculate_last_ftr_feature(df):
 
     # Update the dict for this game below :)
 
-    fthg = df.iloc[i]['FTHG']
-    ftag = df.iloc[i]['FTAG']
+    fthg = df.iloc[i][FTHG]
+    ftag = df.iloc[i][FTAG]
 
     lastFTG_dict[(h_team, a_team)] = fthg
     lastFTG_dict[(a_team, h_team)] = ftag
-  
-  df['H_LastFTG'] = h_lastFTG
-  df['A_LastFTG'] = a_lastFTG
+
+  df[H_LastFTG] = h_lastFTG
+  df[A_LastFTG] = a_lastFTG
 
   return df
 
 
-
-def calculate_mmr_feature(df, draw_probability=0.265, home_advantage = 1.3):
-  teams = np.unique(np.array(df.H_team.tolist() + df.A_team.tolist()))
+def calculate_mmr_feature(df, draw_probability=0.265, home_advantage=1.3):
+  teams = np.unique(np.array(df[HomeTeam].tolist() + df[AwayTeam].tolist()))
 
   trueSkill_env = TrueSkill(draw_probability=draw_probability)
   trueSkill_dict = {}
@@ -234,8 +237,8 @@ def calculate_mmr_feature(df, draw_probability=0.265, home_advantage = 1.3):
   a_mmr = []
 
   for i in range(len(df)):
-    h_team = df.iloc[i]['H_team']
-    a_team = df.iloc[i]['A_team']
+    h_team = df.iloc[i][HomeTeam]
+    a_team = df.iloc[i][AwayTeam]
 
     # Update the mmr lists
     og_h_trueskill = trueSkill_dict[h_team]
@@ -248,8 +251,8 @@ def calculate_mmr_feature(df, draw_probability=0.265, home_advantage = 1.3):
     a_mmr.append(a_trueskill.mu)
 
     # Update the mmr dict for this game below :)
-    fthg = df.iloc[i]['FTHG']
-    ftag = df.iloc[i]['FTAG']
+    fthg = df.iloc[i][FTHG]
+    ftag = df.iloc[i][FTAG]
 
     # If home won
     if fthg > ftag:
@@ -261,18 +264,17 @@ def calculate_mmr_feature(df, draw_probability=0.265, home_advantage = 1.3):
     else:
       new_h_trueskill, a_trueskill = trueSkill_env.rate_1vs1(h_trueskill, a_trueskill, drawn=True)
 
-    trueSkill_dict[h_team] = Rating(og_h_trueskill.mu + (new_h_trueskill.mu - h_trueskill.mu), new_h_trueskill.sigma)
+    trueSkill_dict[h_team] = Rating(og_h_trueskill.mu + (new_h_trueskill.mu - h_trueskill.mu),
+                                    new_h_trueskill.sigma)
     trueSkill_dict[a_team] = a_trueskill
 
-  df['H_MMR'] = h_mmr
-  df['A_MMR'] = a_mmr
+  df[H_MMR] = h_mmr
+  df[A_MMR] = a_mmr
   return df
 
 
-
-
 def calculate_points_feature(df, num_matches=15):
-  teams = np.unique(np.array(df.H_team.tolist() + df.A_team.tolist()))
+  teams = np.unique(np.array(df[HomeTeam].tolist() + df[AwayTeam].tolist()))
   points_dict = {}
 
   # Create lists for the 'to-be-created' columns
@@ -283,8 +285,8 @@ def calculate_points_feature(df, num_matches=15):
     points_dict[team] = [0]
 
   for i in range(len(df)):
-    h_team = df.iloc[i]['H_team']
-    a_team = df.iloc[i]['A_team']
+    h_team = df.iloc[i][HomeTeam]
+    a_team = df.iloc[i][AwayTeam]
 
     # Update the points lists
     h_points.append(np.sum(points_dict[h_team][-num_matches:]))
@@ -294,8 +296,8 @@ def calculate_points_feature(df, num_matches=15):
     h_points_update = points_dict[h_team]
     a_points_update = points_dict[a_team]
 
-    fthg = df.iloc[i]['FTHG']
-    ftag = df.iloc[i]['FTAG']
+    fthg = df.iloc[i][FTHG]
+    ftag = df.iloc[i][FTAG]
 
     # If home won
     if fthg > ftag:
@@ -313,18 +315,19 @@ def calculate_points_feature(df, num_matches=15):
     points_dict[h_team] = h_points_update
     points_dict[a_team] = a_points_update
 
-  df['H_'  + str(num_matches) + 'Points'] = h_points
-  df['A_'  + str(num_matches) + 'Points'] = a_points
+  df[H_points(num_matches)] = h_points
+  df[A_points(num_matches)] = a_points
   return df
-
 
 
 '''
 Add realized EV feature to the given dataframe.
 Realized EV is: +odds if team won a match or viceversa over a window of matches
 '''
+
+
 def calculate_realized_ev_feature(df, num_matches=5):
-  teams = np.unique(np.array(df.H_team.tolist() + df.A_team.tolist()))
+  teams = np.unique(np.array(df[HomeTeam].tolist() + df[AwayTeam].tolist()))
   ev_dict = {}
 
   # Create lists for the 'to-be-created' columns
@@ -335,8 +338,8 @@ def calculate_realized_ev_feature(df, num_matches=5):
     ev_dict[team] = [0]
 
   for i in range(len(df)):
-    h_team = df.iloc[i]['H_team']
-    a_team = df.iloc[i]['A_team']
+    h_team = df.iloc[i][HomeTeam]
+    a_team = df.iloc[i][AwayTeam]
 
     # Update the points lists
     h_evs.append(np.sum(ev_dict[h_team][-num_matches:]))
@@ -346,11 +349,11 @@ def calculate_realized_ev_feature(df, num_matches=5):
     h_ev_update = ev_dict[h_team]
     a_ev_update = ev_dict[a_team]
 
-    fthg = df.iloc[i]['FTHG']
-    ftag = df.iloc[i]['FTAG']
+    fthg = df.iloc[i][FTHG]
+    ftag = df.iloc[i][FTAG]
 
-    hc_prob = df.iloc[i]['HC_Pinnacle']
-    ac_prob = df.iloc[i]['AC_Pinnacle']
+    hc_prob = df.iloc[i][HomeCloseOdds]
+    ac_prob = df.iloc[i][AwayCloseOdds]
 
     # If home won
     if fthg > ftag:
@@ -368,6 +371,37 @@ def calculate_realized_ev_feature(df, num_matches=5):
     ev_dict[h_team] = h_ev_update
     ev_dict[a_team] = a_ev_update
 
-  df['H_' + str(num_matches) + 'EVs'] = h_evs
-  df['A_' + str(num_matches) + 'EVs'] = a_evs
+  df[H_EVs(num_matches)] = h_evs
+  df[A_EVs(num_matches)] = a_evs
   return df
+
+
+def calculate_features(data_df):
+  # Add features
+  print('Adding Last Close')
+  data_df = calculate_last_close_feature(data_df)
+
+  print('Adding Last FTR')
+  data_df = calculate_last_ftr_feature(data_df)
+
+  print('Adding MMR')
+  data_df = calculate_mmr_feature(data_df)
+
+  print('Adding Points')
+  data_df = calculate_points_feature(data_df, num_matches=5)
+  data_df = calculate_points_feature(data_df, num_matches=10)
+  data_df = calculate_points_feature(data_df, num_matches=15)
+
+  print('Adding Realized EV')
+  data_df = calculate_realized_ev_feature(data_df, num_matches=3)
+  data_df = calculate_realized_ev_feature(data_df, num_matches=5)
+  data_df = calculate_realized_ev_feature(data_df, num_matches=9)
+
+  print('Adding Shock')
+  data_df = calculate_shock_feature(data_df, num_matches=1)
+  data_df = calculate_shock_feature(data_df, num_matches=3)
+  data_df = calculate_shock_feature(data_df, num_matches=5)
+
+  print('Adding Winstreak')
+  data_df = calculate_win_streak_feature(data_df)
+  return data_df
