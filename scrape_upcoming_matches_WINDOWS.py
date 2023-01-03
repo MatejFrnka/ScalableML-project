@@ -4,15 +4,14 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import NoSuchElementException
 from datetime import datetime
 import numpy as np
 from pathlib import Path
-from tqdm import tqdm
 import pandas as pd
 import time
 import re
-import os
+from utils.OddsData import *
+from utils.Features import *
 
 def login(driver):
   login_url = 'https://www.oddsportal.com/login/'
@@ -76,7 +75,8 @@ def complete_dict(driver, dict, bookie, home, draw, away):
   D_open, D_close, Open_time = extract_open_close_odds(driver, draw)
   A_open, A_close, Open_time = extract_open_close_odds(driver, away)
 
-  new_dict = {'OT_' + b : [Open_time], 'HO_' + b : [H_open], 'DO_' + b : [D_open], 'AO_' + b: [A_open],
+  #'OT_' + b : [Open_time], 
+  new_dict = {'HO_' + b : [H_open], 'DO_' + b : [D_open], 'AO_' + b: [A_open],
               'HC_' + b : [H_close], 'DC_' + b : [D_close], 'AC_' + b: [A_close]}
 
   dict.update(new_dict)
@@ -127,6 +127,23 @@ def get_match_urls(driver):
 
   return urls
 
+def combine_upcoming_and_old(upcoming, country, league):
+  premier_league_df = read_odds(countries=country, leagues=league)
+  premier_league_df = remove_nan_vals(premier_league_df)
+  premier_league_df["Date"] = [pd.to_datetime(x).date() for x in premier_league_df["Date"]]
+
+  df = pd.concat([premier_league_df, upcoming], sort=False, ignore_index=True).fillna(np.nan)
+  df = transform_odds_to_probs(df)
+  df = drop_duplicates(df)
+  df = drop_bookies(df)
+  df = sort_odds_by_date(df)
+  return df
+
+def drop_features(df):
+  # TODO: Drop more features? country? league? h_team? a_team?
+  df = df.drop(['date', 'time', 'fthg', 'ftag', 'ht1hg', 'ht1ag', 'ht2hg', 'ht2ag'], axis=1)
+  return df
+
 def scrape_upcoming_matches(country='england', league='premier-league'):
   options = Options()
   options.headless = True
@@ -139,9 +156,25 @@ def scrape_upcoming_matches(country='england', league='premier-league'):
   driver.get(url)
   match_urls = get_match_urls(driver)
   matches_df = scrape_matches(driver, match_urls, country, league)
-  print(matches_df)
 
   driver.quit()
 
+  return matches_df
+
 if __name__ == "__main__":
-  scrape_upcoming_matches()
+  country, league = 'england', 'premier-league'
+
+  upcoming_matches_df = scrape_upcoming_matches(country, league)
+  print(upcoming_matches_df)
+
+  df = combine_upcoming_and_old(upcoming_matches_df, country, league)
+  print(df)
+
+  df = calculate_features(df)
+  print(df)
+
+  df = drop_features(df)
+  print(df)
+
+  # Just checking
+  # print(df.loc[((df['h_team'] == 'ManchesterUtd') & (df['a_team'] == 'ManchesterCity')) | ((df['h_team'] == 'ManchesterCity') & (df['a_team'] == 'ManchesterUtd'))])

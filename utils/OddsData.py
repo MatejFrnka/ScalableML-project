@@ -31,6 +31,9 @@ def read_odds(countries='all', leagues='all', sortedDate=True):
 
   if type(countries) != list:
     countries = [countries]
+
+  if type(leagues) != list:
+    leagues = [leagues]
   
   paths = get_all_paths()
   df_list = []
