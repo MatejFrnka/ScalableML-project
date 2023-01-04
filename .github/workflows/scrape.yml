@@ -14,4 +14,6 @@ jobs:
       - run: sudo apt purge chromium-browser
       - run: sudo apt install -y chromium-browser
       - run: pip install selenium==3.141 numpy pandas trueskill
+      - run: ls
+      - run: cd ScalableML-project
       - run: python python scrape_upcoming_matches_WINDOWS.py
