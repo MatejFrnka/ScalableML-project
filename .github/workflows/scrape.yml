@@ -9,10 +9,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-python@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
       - run: sudo apt purge google-chrome-stable
       - run: sudo apt purge chromium-browser
       - run: sudo apt install -y chromium-browser
-      - run: pip install selenium==3.141 numpy pandas trueskill
-      - run: ls
+      - run: pip install selenium==3.141 numpy pandas trueskill hopsworks
       - run: python scrape_upcoming_matches_WINDOWS.py
