@@ -6,11 +6,8 @@ on:
 
 jobs:
   check-bats-version:
-    runs-on: ubuntu-latest
+    runs-on: joyzoursky/python-chromedriver:3.9
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: '14'
-      - run: npm install -g bats
-      - run: bats -v
+      - run: pip install selenium=3.141 numpy pandas trueskill
+      - run: python python scrape_upcoming_matches_WINDOWS.py
