@@ -1,4 +1,7 @@
+from datetime import datetime
+
 import numpy as np
+import pandas as pd
 
 
 class Games:
@@ -66,7 +69,11 @@ class Evaluator:
         return Games(*[np.array(k) for k in zip(*buy)])
 
     @staticmethod
-    def evaluate_buy_signals(home_goals, away_goals, odds, buy_sig):
+    def drop_time(date):
+        return datetime(date.year, date.month, date.day)
+
+    @staticmethod
+    def evaluate_buy_signals(home_goals, away_goals, odds, buy_sig, game_dates):
         """
         :param home_goals: aray of goals scored by home team, one entry = one game
         :param away_goals: aray of goals scored by home team, one entry = one game
@@ -89,16 +96,59 @@ class Evaluator:
         winning_bets = ((h_outcome & buy_sig.home).sum()
                         + (d_outcome & buy_sig.draw).sum()
                         + (a_outcome & buy_sig.away).sum())
-
+        # todo, check average odds i bet on
+        first_game_date = Evaluator.drop_time(min(game_dates))
+        last_game_date = Evaluator.drop_time(max(game_dates))
+        money, times = Evaluator.graph_data(away_goals, buy_sig, game_dates, home_goals, odds)
+        money_chart = {
+            "date": times, "money": money
+        }
         metrics = {
             "roi": float(h_win + d_win + a_win - total_spent),
             "bet_count": float(total_spent),
             "bet_winning": float(winning_bets),
             "bet_loosing": float(total_spent - winning_bets),
-            "win_percentage": float(winning_bets / total_spent)
+            "win_percentage": float(winning_bets / total_spent),
+            "first_date": first_game_date.timestamp(),
+            "last_date": last_game_date.timestamp(),
+            "date_run": datetime.now().timestamp(),
         }
 
-        return metrics
+        return metrics, money_chart
+
+    @staticmethod
+    def graph_data(away_goals, buy_sig, game_dates, home_goals, odds):
+        first_game_date = Evaluator.drop_time(min(game_dates))
+        last_game_date = Evaluator.drop_time(max(game_dates))
+        times = pd.date_range(start=first_game_date, end=last_game_date, freq='1D')
+        changes = {}
+        for home_goal, away_goal, h_odd, d_odd, a_odd, h_buy, d_buy, a_buy, date \
+                in zip(home_goals, away_goals, odds.home, odds.draw, odds.away, buy_sig.home, buy_sig.draw,
+                       buy_sig.away,
+                       game_dates):
+            def evaluate(won, odd):
+                d = Evaluator.drop_time(date)
+                if d not in changes:
+                    changes[d] = 0
+                if won:
+                    changes[d] += odd
+                changes[d] -= 1
+
+            if h_buy:
+                evaluate(home_goal > away_goal, h_odd)
+            if d_buy:
+                evaluate(home_goal == away_goal, d_odd)
+            if a_buy:
+                evaluate(home_goal < away_goal, a_odd)
+        money = []
+        money_curr = 0
+        for i in range(len(times)):
+            if times[i] in changes:
+                money_curr += changes[times[i]]
+            money.append(money_curr)
+        print(money_curr)
+        times = [t.timestamp() for t in times]
+        return money, times
 
 # example usage:
 # evaluator = Evaluator(0.05)

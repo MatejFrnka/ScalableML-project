@@ -48,6 +48,7 @@ def train_model(df_train, train_size=0.75, metrics_directory=None):
     X_valid, y_valid = df_valid[X_COLUMNS].copy(), df_valid[Y_COLUMNS].copy()
 
     # scale scalable columns
+    # todo: try min max scaler
     scaler = MaxAbsScaler()
     scaler.fit(X_train[X_SCALE_COLUMNS])
     X_train[X_SCALE_COLUMNS] = scaler.transform(X_train[X_SCALE_COLUMNS])
@@ -99,14 +100,12 @@ def test_performance(feature_view, evaluator, days_back):
     predictions = model.predict(X_test)
     predicted_odds = Games(*predictions.T)
     buy_sig = evaluator.generate_buy_signals(open_percentage, predicted_odds)
-    metrics = Evaluator.evaluate_buy_signals(df_test["fthg"].array,
-                                             df_test["ftag"].array,
-                                             open_percentage.get_odds(),
-                                             buy_sig)
-    metrics["first_date"] = str(min(df_test["date"]))
-    metrics["last_date"] = str(max(df_test["date"]))
-    metrics["date_run"] = str(datetime.now())
-    return metrics
+    metrics, money_chart = Evaluator.evaluate_buy_signals(df_test["fthg"].array,
+                                                          df_test["ftag"].array,
+                                                          open_percentage.get_odds(),
+                                                          buy_sig, df_test["date"])
+
+    return metrics, money_chart
 
 
 # delete directory if exists
@@ -129,7 +128,7 @@ train, _ = feature_view.training_data()
 evaluator = Evaluator(0.05)
 
 # measure performance of last year
-metrics = test_performance(feature_view, evaluator, 365)
+metrics, money_chart = test_performance(feature_view, evaluator, 365)
 print(metrics)
 # train model on all available data
 scaler, model = train_model(train, 0.75, dirpath)
@@ -144,7 +143,9 @@ model_dir.mkdir()
 model.save(model_dir)
 
 with open(dirpath / 'metrics.json', 'w') as file:
-    json.dump(metrics, file)
+    combined = metrics.copy()
+    combined["money_chart"] = money_chart
+    json.dump(combined, file)
 
 # We will now upload our model to the Hopsworks Model Registry. First get an object for the model registry.
 mr = project.get_model_registry()
@@ -152,7 +153,14 @@ mr = project.get_model_registry()
 model_football = mr.python.create_model(
     name="model_football",
     description="Football close odds predictions",
+    metrics=metrics
+)
+metrics_football = mr.python.create_model(
+    name="metrics_football",
+    description="Football close odds predictions metrics",
+    metrics=metrics,
 )
 
 # Upload the model to the model registry, including all files in 'model_dir'
 model_football.save(dirpath)
+metrics_football.save(dirpath / 'metrics.json')
