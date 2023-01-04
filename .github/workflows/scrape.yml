@@ -6,7 +6,7 @@ on:
 
 jobs:
   check-bats-version:
-    runs-on: joyzoursky/python-chromedriver:3.9
+    runs-on: joyzoursky/python-chromedriver:3.9-alpine
     steps:
       - uses: actions/checkout@v3
       - run: pip install selenium=3.141 numpy pandas trueskill
