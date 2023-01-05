@@ -117,6 +117,45 @@ class Evaluator:
         return metrics, money_chart
 
     @staticmethod
+    def average_winners_odds(home_goals, away_goals, predictions, given):
+        h_p = []
+        d_p = []
+        a_p = []
+        h_g = []
+        d_g = []
+        a_g = []
+        for home_goal, away_goal, h_pred, d_pred, a_pred, h_giv, d_giv, a_giv in zip(
+                home_goals, away_goals,
+                predictions.home, predictions.draw,
+                predictions.away, given.home,
+                given.draw,
+                given.away):
+            if home_goal > away_goal:
+                h_p.append(h_pred)
+                h_g.append(h_giv)
+            elif home_goal == away_goal:
+                d_p.append(d_pred)
+                d_g.append(d_giv)
+            elif home_goal < away_goal:
+                a_p.append(a_pred)
+                a_g.append(a_giv)
+            else:
+                raise Exception("home_goal or away_goal is not a number")
+        all_p = [*h_p, *d_p, *a_p]
+        all_g = [*h_g, *d_g, *a_g]
+        averages = {
+            'all_given_mean': float(np.mean(all_g)),
+            'all_pred_mean': float(np.mean(all_p)),
+            'home_given_mean': float(np.mean(h_g)),
+            'home_pred_mean': float(np.mean(h_p)),
+            'draw_given_mean': float(np.mean(d_g)),
+            'draw_pred_mean': float(np.mean(d_p)),
+            'away_given_mean': float(np.mean(a_g)),
+            'away_pred_mean': float(np.mean(a_p)),
+        }
+        return averages
+
+    @staticmethod
     def graph_data(away_goals, buy_sig, game_dates, home_goals, odds):
         first_game_date = Evaluator.drop_time(min(game_dates))
         last_game_date = Evaluator.drop_time(max(game_dates))

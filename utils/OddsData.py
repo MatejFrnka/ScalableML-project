@@ -1,6 +1,9 @@
 import pandas as pd
 import os
 
+from consts import *
+
+
 def get_all_paths():
   basePath = './data/soccer/historical/'
   leagues = os.listdir(basePath)
@@ -13,7 +16,7 @@ def get_all_paths():
   return paths
 
 def sort_odds_by_date(df):
-  df.sort_values('Date', inplace=True)
+  df.sort_values('date', inplace=True)
   df = df.reset_index().drop('index', axis=1)
   return df
 
@@ -21,6 +24,7 @@ def read_all_odds(sortedDate=True):
   paths = get_all_paths()
   df_list = [pd.read_csv(path, index_col=[0]) for path in paths]
   df = pd.concat(df_list)
+  df.columns= map(str.lower,df.columns)
   if sortedDate:
     df = sort_odds_by_date(df)
   return df
@@ -34,7 +38,7 @@ def read_odds(countries='all', leagues='all', sortedDate=True):
 
   if type(leagues) != list:
     leagues = [leagues]
-  
+
   paths = get_all_paths()
   df_list = []
   for path in paths:
@@ -47,6 +51,7 @@ def read_odds(countries='all', leagues='all', sortedDate=True):
             df_list.append(pd.read_csv(path, index_col=[0]))
 
   df = pd.concat(df_list)
+  df.columns= map(str.lower,df.columns)
   if sortedDate:
     df = sort_odds_by_date(df)
 
@@ -56,7 +61,7 @@ def read_odds(countries='all', leagues='all', sortedDate=True):
 
 
 def drop_nan_cols(df):
-  pinnNaN = max(df[['HO_Pinnacle', 'DO_Pinnacle', 'AO_Pinnacle', 'HC_Pinnacle', 'DC_Pinnacle', 'AC_Pinnacle']].isna().sum())
+  pinnNaN = max(df[['ho_pinnacle', 'do_pinnacle', 'ao_pinnacle', 'hc_pinnacle', 'dc_pinnacle', 'ac_pinnacle']].isna().sum())
 
   for column in df:
     numNaN = df[column].isna().sum()
@@ -93,15 +98,15 @@ def transform_odds_to_probs(df):
   # Loop through all columns, if they start with '(HO,AO,DO,HC,AC,DC) we assume it is a bet from a bookie
   #Then transform it into a probablity (ignoring cut from bookies)
   for i in range(len(df.columns)):
-    if df.columns[i].startswith(('HO','AO','DO','HC','AC','DC')):
+    if df.columns[i].startswith(('ho','ao','do','hc','ac','dc')):
       df.iloc[:,[i]] = df.iloc[:,[i]].apply(lambda j : 1/j)
 
   return df
 
-def drop_bookies(df, keep=['Pinnacle']):
+def drop_bookies(df, keep=['pinnacle']):
   for col in df:
     drop = True
-    if col.startswith(('HO','AO','DO','HC','AC','DC')):
+    if col.startswith(('ho','ao','do','hc','ac','dc')):
       for bookie in keep:
         if bookie in col:
           drop = False
@@ -110,20 +115,20 @@ def drop_bookies(df, keep=['Pinnacle']):
   return df
 
 def drop_date_time(df):
-  return df.drop(['Date', 'Time'], axis=1)
+  return df.drop(['date', 'time'], axis=1)
 
 
 # Create targets for dataframe
 def create_target(row):
-    if row['FTHG'] > row['FTAG']:
+    if row[FTHG] > row[FTAG]:
       return 'H'
-    elif row['FTAG'] > row['FTHG']:
+    elif row[FTAG] > row[FTHG]:
       return 'A'
     else:
       return 'D'
 
 def calculate_targets(df):
-  df['Target'] = df.apply(lambda row: create_target(row), axis=1)
+  df['target'] = df.apply(lambda row: create_target(row), axis=1)
   return df
 
 

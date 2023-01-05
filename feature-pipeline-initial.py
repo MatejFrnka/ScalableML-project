@@ -6,7 +6,7 @@ import pandas as pd
 
 data_df = read_odds(countries='all')
 data_df = remove_nan_vals(data_df)
-data_df["Date"] = pd.to_datetime(data_df["Date"])
+data_df["date"] = pd.to_datetime(data_df["date"])
 data_df = transform_odds_to_probs(data_df)
 data_df = drop_duplicates(data_df)
 

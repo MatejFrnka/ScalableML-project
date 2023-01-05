@@ -98,14 +98,18 @@ def test_performance(feature_view, evaluator, days_back):
                             df_test["ao_pinnacle"].array)
 
     predictions = model.predict(X_test)
-    predicted_odds = Games(*predictions.T)
-    buy_sig = evaluator.generate_buy_signals(open_percentage, predicted_odds)
+    predicted_percentages = Games(*predictions.T)
+    buy_sig = evaluator.generate_buy_signals(open_percentage, predicted_percentages)
     metrics, money_chart = Evaluator.evaluate_buy_signals(df_test["fthg"].array,
                                                           df_test["ftag"].array,
                                                           open_percentage.get_odds(),
                                                           buy_sig, df_test["date"])
+    average_winners_odds = Evaluator.average_winners_odds(df_test["fthg"].array,
+                                                          df_test["ftag"].array,
+                                                          predicted_percentages,
+                                                          open_percentage)
 
-    return metrics, money_chart
+    return metrics, money_chart, average_winners_odds
 
 
 # delete directory if exists
@@ -128,8 +132,12 @@ train, _ = feature_view.training_data()
 evaluator = Evaluator(0.05)
 
 # measure performance of last year
-metrics, money_chart = test_performance(feature_view, evaluator, 365)
+metrics, money_chart, average_winners = test_performance(feature_view, evaluator, 365)
 print(metrics)
+print(average_winners)
+all_metrics = metrics.copy()
+all_metrics["money_chart"] = money_chart
+all_metrics["average_winners"] = average_winners
 # train model on all available data
 scaler, model = train_model(train, 0.75, dirpath)
 
@@ -143,9 +151,7 @@ model_dir.mkdir()
 model.save(model_dir)
 
 with open(dirpath / 'metrics.json', 'w') as file:
-    combined = metrics.copy()
-    combined["money_chart"] = money_chart
-    json.dump(combined, file)
+    json.dump(all_metrics, file)
 
 # We will now upload our model to the Hopsworks Model Registry. First get an object for the model registry.
 mr = project.get_model_registry()
