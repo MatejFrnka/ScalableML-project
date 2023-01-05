@@ -17,3 +17,5 @@ jobs:
       - run: sudo apt install -y chromium-browser
       - run: pip install selenium==3.141 numpy pandas trueskill hopsworks tensorflow
       - run: python feature-upcoming-pipeline.py
+        env:
+          HOPSWORKS_API_KEY: ${{ secrets.HOPSWORKS_API_KEY }}
