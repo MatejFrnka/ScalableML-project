@@ -271,9 +271,9 @@ def scrape_upcoming_matches(country='england', league='premier-league'):
   options.headless = True
   options.add_argument('--window-size=2560,1400')
   options.add_argument('log-level=1')
-  DRIVER_PATH = Path('./chromedriver/chromedriver.exe').absolute()
-  driver = webdriver.Chrome(options=options, executable_path=DRIVER_PATH)
-  # driver = webdriver.Chrome(options=options)
+  # DRIVER_PATH = Path('./chromedriver/chromedriver.exe').absolute()
+  # driver = webdriver.Chrome(options=options, executable_path=DRIVER_PATH)
+  driver = webdriver.Chrome(options=options)
   driver = login(driver)
 
   url = "https://www.oddsportal.com/soccer/" + country + "/" + league + "/"
