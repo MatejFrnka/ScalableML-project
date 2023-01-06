@@ -16,7 +16,8 @@ import os
 
 from utils.OddsData import *
 
-
+# DRIVER_PATH = Path('./chromedriver/chromedriver.exe').absolute()
+DRIVER_PATH = "chromedriver"
 def login(driver):
   login_url = 'https://www.oddsportal.com/login/'
 
@@ -268,11 +269,12 @@ def update_all_leagues():
 
 def scrape_upcoming_matches(country='england', league='premier-league'):
   options = Options()
+  options.add_argument('--no-sandbox')
+  options.add_argument('--headless')
+  options.add_argument('--disable-dev-shm-usage')
   options.headless = True
   options.add_argument('--window-size=2560,1400')
   options.add_argument('log-level=1')
-  # DRIVER_PATH = Path('./chromedriver/chromedriver.exe').absolute()
-  # driver = webdriver.Chrome(options=options, executable_path=DRIVER_PATH)
   driver = webdriver.Chrome(options=options)
   driver = login(driver)
 
@@ -305,13 +307,12 @@ def scrape_historical_league(country, league, stop_at=None):
     os.makedirs(base_path)
 
   options = Options()
+  options.add_argument('--no-sandbox')
+  options.add_argument('--headless')
+  options.add_argument('--disable-dev-shm-usage')
   options.headless = True
   options.add_argument('--window-size=2560,1400')
   options.add_argument('log-level=1')
-  # When chromedriver is not added to PATH:
-  # DRIVER_PATH = Path('./chromedriver/chromedriver.exe').absolute()
-  # driver = webdriver.Chrome(options=options, executable_path=DRIVER_PATH)
-  # Otherwise:
   driver = webdriver.Chrome(options=options)
   driver = login(driver)
 

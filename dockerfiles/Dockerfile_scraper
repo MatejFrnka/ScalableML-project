@@ -1,0 +1,24 @@
+FROM continuumio/anaconda3
+
+# Install base utilities
+RUN apt-get update
+RUN apt-get install -y wget gcc pip
+RUN apt update
+
+RUN wget https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_92.0.4515.159-1_amd64.deb
+RUN dpkg --configure -a
+RUN apt-get -y install libxss1 lsb-release xdg-utils
+RUN yes | dpkg -i --force-depends google-chrome-stable_92.0.4515.159-1_amd64.deb
+RUN yes | apt-get install -f
+
+RUN wget https://chromedriver.storage.googleapis.com/92.0.4515.107/chromedriver_linux64.zip
+RUN apt install unzip
+RUN unzip chromedriver_linux64.zip
+RUN mv chromedriver /usr/bin/chromedriver
+RUN chown root:root /usr/bin/chromedriver
+RUN chmod +x /usr/bin/chromedriver
+
+#RUN conda install cudatoolkit=11.2 cudnn=8.1.0 cuda-nvcc -c conda-forge -c nvidia --yes
+#RUN pip install tensorflow~=2.9.1 selenium==3.141 numpy pandas trueskill scikit-learn matplotlib
+#RUN pip install hopsworks
+WORKDIR /project

@@ -1,7 +1,7 @@
 FW_VERSION = 5
 FG_VERSION = 6
-FW_UPCOMING_VERSION = 1
-FG_UPCOMING_VERSION = 1
+FW_UPCOMING_VERSION = 2
+FG_UPCOMING_VERSION = 2
 
 HomeTeam = 'h_team'  # H_team
 AwayTeam = 'a_team'  # A_team
