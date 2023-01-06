@@ -22,6 +22,9 @@ H_LastFTG = 'h_lastftg'  # H_LastFTG
 A_LastFTG = 'a_lastftg'  # A_LastFTG
 H_MMR = 'h_mmr'  # H_MMR
 A_MMR = 'a_mmr'  # A_MMR
+H_win = 'h_win'
+D_win = 'd_win'
+A_win = 'a_win'
 
 
 def H_shock(num_matches): return 'h_' + str(num_matches) + 'shock'  # 'H_' + str(num_matches) + 'shock'
@@ -48,7 +51,7 @@ X_SCALE_COLUMNS = ['h_lastftg', 'a_lastftg',
                    'h_3evs', 'a_3evs', 'h_5evs', 'a_5evs', 'h_9evs', 'a_9evs', 'h_1shock', 'a_1shock', 'h_3shock',
                    'a_3shock', 'h_5shock', 'a_5shock', 'h_winstreak', 'a_winstreak']
 
-Y_COLUMNS = ['hc_pinnacle', 'dc_pinnacle', 'ac_pinnacle']
+Y_COLUMNS = ['h_win', 'd_win', 'a_win']
 X_COLUMNS = ['ao_pinnacle', 'a_lastodds', 'do_pinnacle', 'ho_pinnacle', 'h_lastodds', *X_SCALE_COLUMNS]
 KEY_COLUMNS = ['h_team', 'a_team', 'date']
 INFO_COLUMNS = ['fthg', 'ftag', 'league', 'country']
