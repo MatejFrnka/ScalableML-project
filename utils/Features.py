@@ -5,6 +5,40 @@ from consts import *
 from multiprocessing import Process
 
 '''
+Add targets
+'''
+def add_targets_feature(df):
+
+  # Create lists for the 'to-be-created' columns
+  h_wins = []
+  d_wins = []
+  a_wins = []
+
+  for i in range(len(df)):
+    hg = df.iloc[i][FTHG]
+    ag = df.iloc[i][FTAG]
+
+    if hg > ag:
+      h_wins.append(1)
+      d_wins.append(0)
+      a_wins.append(0)
+    elif ag > hg:
+      h_wins.append(0)
+      d_wins.append(0)
+      a_wins.append(1)
+    elif hg == ag:
+      h_wins.append(0)
+      d_wins.append(1)
+      a_wins.append(0)
+
+  df[H_win] = h_wins
+  df[D_win] = d_wins
+  df[A_win] = a_wins
+
+  return df
+
+
+'''
 Add last close odds feature for each team and match
 '''
 def calculate_last_close_feature(df):
@@ -379,7 +413,11 @@ def calculate_realized_ev_feature(df, num_matches=5):
 
 def calculate_features(data_df):
   data_df.columns = map(str.lower, data_df.columns)
+
   # Add features
+  print('Adding targets: h_win, d_win, a_win')
+  data_df = add_targets_feature(data_df)
+  
   print('Adding Last Close')
   data_df = calculate_last_close_feature(data_df)
 
