@@ -1,0 +1,3 @@
+hopsworks
+pandas
+Jinja2==3.0.3
