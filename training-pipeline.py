@@ -2,7 +2,7 @@ import modal
 from consts import X_COLUMNS, Y_COLUMNS, X_SCALE_COLUMNS
 from utils.BackTest import Games, Evaluator
 
-LOCAL = False
+LOCAL = True
 
 if not LOCAL:
     stub = modal.Stub(
@@ -15,7 +15,7 @@ if not LOCAL:
                          "scikit-learn", "matplotlib")
         ),
     )
-    @stub.function(schedule=modal.Period(days=1), secret=modal.Secret.from_name("HOPSWORKS_API_KEY"))
+    @stub.function(schedule=modal.Period(days=7), secret=modal.Secret.from_name("HOPSWORKS_API_KEY"))
     def run():
         train_model()
 
@@ -65,7 +65,6 @@ def train_model():
         X_valid, y_valid = df_valid[X_COLUMNS].copy(), df_valid[Y_COLUMNS].copy()
 
         # scale scalable columns
-        # todo: try min max scaler
         scaler = MaxAbsScaler()
         scaler.fit(X_train[X_SCALE_COLUMNS])
         X_train[X_SCALE_COLUMNS] = scaler.transform(X_train[X_SCALE_COLUMNS])
@@ -83,7 +82,7 @@ def train_model():
         model.add(Dense(3, activation='linear'))
         model.summary()
         model.compile(loss='mse', optimizer='adam', metrics=['mse', 'mae'])
-        history = model.fit(X_train, y_train, epochs=50, batch_size=400, verbose=1, validation_data=(X_valid, y_valid))
+        history = model.fit(X_train, y_train, epochs=20, batch_size=400, verbose=1, validation_data=(X_valid, y_valid))
         plot_history(history, metrics_directory)
         return scaler, model
 
@@ -115,7 +114,7 @@ def train_model():
 
         predictions = model.predict(X_test)
         predicted_percentages = Games(*predictions.T)
-        buy_sig = evaluator.generate_buy_signals(open_percentage, predicted_percentages)
+        buy_sig = evaluator.generate_buy_signals(predicted_percentages)
         metrics, money_chart = Evaluator.evaluate_buy_signals(df_test["fthg"].array,
                                                               df_test["ftag"].array,
                                                               open_percentage.get_odds(),
@@ -145,7 +144,7 @@ def train_model():
     # no labels are set in the feature view
     feature_view.delete_all_training_datasets()
     train, _ = feature_view.training_data()
-    evaluator = Evaluator(0.05)
+    evaluator = Evaluator(0.7)
 
     # measure performance of last year
     metrics, money_chart, average_winners = test_performance(feature_view, evaluator, 365)
@@ -194,4 +193,4 @@ if __name__ == "__main__":
         with stub.run():
             run.call()
     else:
-        train_model.call()
+        train_model()

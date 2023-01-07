@@ -16,8 +16,10 @@ import os
 
 from utils.OddsData import *
 
-# DRIVER_PATH = Path('./chromedriver/chromedriver.exe').absolute()
-DRIVER_PATH = "chromedriver"
+DRIVER_PATH = Path('./chromedriver/chromedriver.exe').absolute()
+
+
+# DRIVER_PATH = "chromedriver"
 
 
 def login(driver):
@@ -90,13 +92,13 @@ def get_meta_data(driver, country, league, results=True):
         HT1HG, HT1AG = int(results[1].split(':')[0]), int(results[1].split(':')[1])
         HT2HG, HT2AG = int(results[2].split(':')[0]), int(results[2].split(':')[1])
 
-        dict = {'Country': [country], 'League': [league], 'H_team': [H_team],
-                'A_team': [A_team], 'Date': [date.date()], 'Time': [date.time()],
-                'FTHG': [FTHG], 'FTAG': [FTAG], 'HT1HG': [HT1HG], 'HT1AG': [HT1AG],
-                'HT2HG': [HT2HG], 'HT2AG': [HT2AG]}
+        dict = {'country': [country], 'league': [league], 'h_team': [H_team],
+                'a_team': [A_team], 'date': [date.date()], 'time': [date.time()],
+                'fthg': [FTHG], 'ftag': [FTAG], 'ht1hg': [HT1HG], 'ht1ag': [HT1AG],
+                'ht2hg': [HT2HG], 'ht2ag': [HT2AG]}
     else:
-        dict = {'Country': [country], 'League': [league], 'H_team': [H_team],
-                'A_team': [A_team], 'Date': [date.date()], 'Time': [date.time()]}
+        dict = {'country': [country], 'league': [league], 'h_team': [H_team],
+                'a_team': [A_team], 'date': [date.date()], 'time': [date.time()]}
 
     # PRINTS
     # print(H_team + ' - ' + A_team)
@@ -124,7 +126,7 @@ def scrape_match_page(driver, country, league, results=True):
     odds_data_table = driver.find_elements_by_xpath("//*[@id =" + '"odds-data-table"' + "]/div[1]/table/tbody/tr")
     num_rows = len(odds_data_table)
 
-    print('Reading odds for ' + str(dict['H_team'][0]) + ' - ' + str(dict['A_team'][0]) + '...')
+    print('Reading odds for ' + str(dict['h_team'][0]) + ' - ' + str(dict['a_team'][0]) + '...')
 
     for index in (range(1, num_rows)):
         row_data = driver.find_elements_by_xpath(
@@ -156,7 +158,6 @@ def scrape_matches(driver, match_urls, country, league, stop_at=None, results=Tr
         driver.get(url)
         try:
             meta_data = get_meta_data(driver, country, league, results)
-
             # If we are scraping historic results
             if results:
                 # Check that the match is in the past
@@ -174,7 +175,7 @@ def scrape_matches(driver, match_urls, country, league, stop_at=None, results=Tr
                 match_df = scrape_match_page(driver, country, league, results)
 
             df = pd.concat([match_df, df], sort=False, ignore_index=True).fillna(np.nan)
-        except:
+        except Exception as e:
             print('Could not scrape match:', str(url))
     return df, False
 
@@ -275,14 +276,7 @@ def update_all_leagues():
 
 
 def scrape_upcoming_matches(country='england', league='premier-league'):
-    options = Options()
-    options.add_argument('--no-sandbox')
-    options.add_argument('--headless')
-    options.add_argument('--disable-dev-shm-usage')
-    options.headless = True
-    options.add_argument('--window-size=2560,1400')
-    options.add_argument('log-level=1')
-    driver = webdriver.Chrome(options=options)
+    driver = get_driver()
     driver = login(driver)
 
     url = "https://www.oddsportal.com/soccer/" + country + "/" + league + "/"
@@ -313,14 +307,7 @@ def scrape_historical_league(country, league, stop_at=None):
     if not os.path.exists(base_path):
         os.makedirs(base_path)
 
-    options = Options()
-    options.add_argument('--no-sandbox')
-    options.add_argument('--headless')
-    options.add_argument('--disable-dev-shm-usage')
-    options.headless = True
-    options.add_argument('--window-size=2560,1400')
-    options.add_argument('log-level=1')
-    driver = webdriver.Chrome(options=options)
+    driver = get_driver()
     driver = login(driver)
 
     start_url = 'https://www.oddsportal.com/soccer/' + country + '/' + league + '/results/'
@@ -353,6 +340,19 @@ def scrape_historical_league(country, league, stop_at=None):
             else:
                 df.to_csv(os.path.join(base_path, file_name))
     driver.quit()
+    return df
+
+
+def get_driver():
+    options = Options()
+    options.add_argument('--no-sandbox')
+    options.add_argument('--headless')
+    options.add_argument('--disable-dev-shm-usage')
+    options.headless = True
+    options.add_argument('--window-size=2560,1400')
+    options.add_argument('log-level=1')
+    driver = webdriver.Chrome(executable_path=DRIVER_PATH, options=options)
+    return driver
 
 
 def scrape_upcoming(country, league, existing_matches):
@@ -378,18 +378,33 @@ def scrape_upcoming(country, league, existing_matches):
     return df
 
 
+def scrape_historical(country, league, historical_df):
+    latest_match_df = historical_df[-1:]
+    historical_df = historical_df[historical_df['country'] == country]
+    historical_df = historical_df[historical_df['league'] == league]
+
+    new_df = scrape_historical_league(country, league, stop_at=latest_match_df)
+    new_df.columns = map(str.lower, new_df.columns)
+    new_df["date"] = [pd.to_datetime(x).date() for x in new_df["date"]]
+    num_new_matches = len(new_df)
+
+    df = combine_upcoming_and_old(new_df, country, league, historical_df)
+    df = calculate_features(df)
+    return df[-num_new_matches:].reset_index(drop=True)
+
+
 if __name__ == "__main__":
+    country, league = 'england', 'premier-league'
     # Scrape new data
-    # scrape_historical_league('france', 'national')
+    # df = scrape_historical_league(country, league)
 
     # Update an already existing dataframe
-    # update_league_results('england', 'premier-league')
+
 
     # Update all existing dataframes
-    # update_all_leagues()
+    update_all_leagues()
 
-    # Scrape upcoming matches and adding features
-    country, league = 'england', 'premier-league'
-    odds = read_odds(country, league)
-    upcoming = scrape_upcoming(country, league, odds)
-    print(upcoming)
+    # # Scrape upcoming matches and adding features
+    # odds = read_odds(country, league)
+    # upcoming = scrape_upcoming(country, league, odds)
+    # print(upcoming)

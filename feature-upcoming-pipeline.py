@@ -71,13 +71,9 @@ def run_scrape():
     X_upcoming = upcoming[X_COLUMNS].copy()
     X_upcoming[X_SCALE_COLUMNS] = scaler.transform(X_upcoming[X_SCALE_COLUMNS])
 
-    open_percentage = Games(upcoming["ho_pinnacle"].array,
-                            upcoming["do_pinnacle"].array,
-                            upcoming["ao_pinnacle"].array)
-
     predictions = model.predict(X_upcoming)
     predicted_percentages = Games(*predictions.T)
-    buy_sig = evaluator.generate_buy_signals(open_percentage, predicted_percentages)
+    buy_sig = evaluator.generate_buy_signals(predicted_percentages)
     upcoming["h_buy"] = buy_sig.home
     upcoming["d_buy"] = buy_sig.draw
     upcoming["a_buy"] = buy_sig.away

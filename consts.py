@@ -1,5 +1,5 @@
-FW_VERSION = 5
-FG_VERSION = 6
+FW_VERSION = 6
+FG_VERSION = 8
 FW_UPCOMING_VERSION = 2
 FG_UPCOMING_VERSION = 2
 
@@ -45,7 +45,6 @@ def H_EVs(num_matches): return 'h_' + str(num_matches) + 'evs'  # 'H_' + str(num
 def A_EVs(num_matches): return 'a_' + str(num_matches) + 'evs'  # 'A_' + str(num_matches) + 'EVs'
 
 
-# todo columns should take names from consts above
 X_SCALE_COLUMNS = ['h_lastftg', 'a_lastftg',
                    'h_mmr', 'a_mmr', 'h_5points', 'a_5points', 'h_10points', 'a_10points', 'h_15points', 'a_15points',
                    'h_3evs', 'a_3evs', 'h_5evs', 'a_5evs', 'h_9evs', 'a_9evs', 'h_1shock', 'a_1shock', 'h_3shock',

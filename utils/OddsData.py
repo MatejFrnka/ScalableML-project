@@ -23,8 +23,9 @@ def sort_odds_by_date(df):
 def read_all_odds(sortedDate=True):
   paths = get_all_paths()
   df_list = [pd.read_csv(path, index_col=[0]) for path in paths]
+  for d in df_list:
+    d.columns =  map(str.lower,d.columns)
   df = pd.concat(df_list)
-  df.columns= map(str.lower,df.columns)
   if sortedDate:
     df = sort_odds_by_date(df)
   return df

@@ -51,7 +51,7 @@ class Evaluator:
             res[max] = True
         return res
 
-    def generate_buy_signals(self, given_percentage, predicted_percentage):
+    def generate_buy_signals(self, predicted_percentage):
         """
 
         :param given_percentage: Games object containing NOT NORMALIZED percentage (sum of home, draw, away > 1) offered by betting site (e.g. Pinnacle)
@@ -60,12 +60,12 @@ class Evaluator:
         :return: Returns Game object containing arrays of True/False for game.home, game.draw, game.away. If any of the arrays is True, it means we should be on given result.
         """
 
-        diff_h = predicted_percentage.home - given_percentage.home
-        diff_d = predicted_percentage.draw - given_percentage.draw
-        diff_a = predicted_percentage.away - given_percentage.away
+        h = predicted_percentage.home
+        d = predicted_percentage.draw
+        a = predicted_percentage.away
 
         # run the buy_function for every game,
-        buy = [self.buy_function(*v) for v in zip(diff_h, diff_d, diff_a)]
+        buy = [self.buy_function(*v) for v in zip(h,d, a)]
         return Games(*[np.array(k) for k in zip(*buy)])
 
     @staticmethod
@@ -96,7 +96,6 @@ class Evaluator:
         winning_bets = ((h_outcome & buy_sig.home).sum()
                         + (d_outcome & buy_sig.draw).sum()
                         + (a_outcome & buy_sig.away).sum())
-        # todo, check average odds i bet on
         first_game_date = Evaluator.drop_time(min(game_dates))
         last_game_date = Evaluator.drop_time(max(game_dates))
         money, times = Evaluator.graph_data(away_goals, buy_sig, game_dates, home_goals, odds)
@@ -188,6 +187,7 @@ class Evaluator:
         print(money_curr)
         times = [t.timestamp() for t in times]
         return money, times
+
 
 # example usage:
 # evaluator = Evaluator(0.05)
