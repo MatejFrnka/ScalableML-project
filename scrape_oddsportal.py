@@ -16,10 +16,8 @@ import os
 
 from utils.OddsData import *
 
-DRIVER_PATH = Path('./chromedriver/chromedriver.exe').absolute()
-
-
-# DRIVER_PATH = "chromedriver"
+DRIVER_PATH = "chromedriver"
+# DRIVER_PATH = Path('./chromedriver/chromedriver.exe').absolute()
 
 
 def login(driver):
@@ -351,7 +349,7 @@ def get_driver():
     options.headless = True
     options.add_argument('--window-size=2560,1400')
     options.add_argument('log-level=1')
-    driver = webdriver.Chrome(executable_path=DRIVER_PATH, options=options)
+    driver = webdriver.Chrome(DRIVER_PATH, options=options)
     return driver
 
 
@@ -379,9 +377,9 @@ def scrape_upcoming(country, league, existing_matches):
 
 
 def scrape_historical(country, league, historical_df):
-    latest_match_df = historical_df[-1:]
     historical_df = historical_df[historical_df['country'] == country]
     historical_df = historical_df[historical_df['league'] == league]
+    latest_match_df = historical_df[-1:]
 
     new_df = scrape_historical_league(country, league, stop_at=latest_match_df)
     new_df.columns = map(str.lower, new_df.columns)
@@ -399,7 +397,6 @@ if __name__ == "__main__":
     # df = scrape_historical_league(country, league)
 
     # Update an already existing dataframe
-
 
     # Update all existing dataframes
     update_all_leagues()
