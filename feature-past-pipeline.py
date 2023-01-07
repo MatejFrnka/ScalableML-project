@@ -7,13 +7,13 @@ from scrape_oddsportal import scrape_historical
 
 from utils.Hopsworks import get_football_featureview, get_football_featuregroup
 
-LOCAL = True
+LOCAL = False
 
 if not LOCAL:
     import modal
 
     stub = modal.Stub(
-        "scarping-upcoming",
+        "scarping-past",
         image=(
             modal.Image.from_dockerfile("dockerfiles/Dockerfile_scraper")
             .conda_install("cudatoolkit=11.2", "cudnn=8.1.0", "cuda-nvcc", channels=["conda-forge", "nvidia"])

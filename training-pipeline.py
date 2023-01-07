@@ -2,7 +2,7 @@ import modal
 from consts import X_COLUMNS, Y_COLUMNS, X_SCALE_COLUMNS
 from utils.BackTest import Games, Evaluator
 
-LOCAL = True
+LOCAL = False
 
 if not LOCAL:
     stub = modal.Stub(
