@@ -288,7 +288,6 @@ def scrape_upcoming_matches(country='england', league='premier-league'):
 
 
 def combine_upcoming_and_old(upcoming, country, league, old_df):
-    old_df = remove_nan_vals(old_df)
     old_df["date"] = [pd.to_datetime(x).date() for x in old_df["date"]]
 
     df = pd.concat([old_df, upcoming], sort=False, ignore_index=True).fillna(np.nan)

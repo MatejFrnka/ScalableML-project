@@ -30,6 +30,10 @@ def add_targets_feature(df):
       h_wins.append(0)
       d_wins.append(1)
       a_wins.append(0)
+    else:
+      h_wins.append(0)
+      d_wins.append(0)
+      a_wins.append(0)
 
   df[H_win] = h_wins
   df[D_win] = d_wins
