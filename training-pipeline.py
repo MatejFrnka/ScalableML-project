@@ -81,8 +81,13 @@ def train_model():
         model.add(Dropout(0.2))
         model.add(Dense(3, activation='linear'))
         model.summary()
-        model.compile(loss='mse', optimizer='adam', metrics=['mse', 'mae'])
-        history = model.fit(X_train, y_train, epochs=20, batch_size=400, verbose=1, validation_data=(X_valid, y_valid))
+        lr_schedule = tensorflow.keras.optimizers.schedules.ExponentialDecay(
+            initial_learning_rate=1e-2,
+            decay_steps=10000,
+            decay_rate=0.9)
+        optimizer = tensorflow.keras.optimizers.SGD(learning_rate=lr_schedule)
+        model.compile(loss='mse', optimizer=optimizer, metrics=['mse', 'mae'])
+        history = model.fit(X_train, y_train, epochs=50, batch_size=400, verbose=1, validation_data=(X_valid, y_valid))
         plot_history(history, metrics_directory)
         return scaler, model
 

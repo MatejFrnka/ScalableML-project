@@ -77,3 +77,22 @@ For some extra clarification, the Shock feature was calculated by taking into ac
 One of our goals of this project was to get practical experience with Neural Networks and therefore a Multi-layer Perpectron Neural Network was chosen as the model for the task. Our first step of modeling was to drop the first 10.000 rows of the data, the oldest matches. This was done because the added features had not yet converged to appropriate values for the model to train on and while testing, showed to decrease the models performance. The data was then split into training, validation and testing sets. Then, the data was scaled using Scikit-learn MaxAbsScaler, which was fitted on the training data and then used on all three partitions.    
 
 The architecture of the MLP Neural Network was 31 input neurons, three hidden layers of 800 neurons each, and an output layer of 3 neurons (31x800x800x800x3). The first four layers used Relu as activation function and the output layer a softmax. The hidden layers were trained using dropout of 20%. The loss function of the neural network as configured to be Mean Squared Error and the optimizer was Adam.
+
+## 5. How to run
+Run pipelines in the following order:
+
+1. `feature-pipeline-initial`
+    * This pipeline is meant to be run locally to upload existing data to hopsworks
+1. `training-pipeline`
+    * This pipeline trains the model and uploads it to hopsworks
+    * It should be re-run weekly to be retrained on the newest data
+1. `feature-upcoming-pipeline`
+    * This pipelines scrapes upcoming matches and predicts the outcomes. Requires model to be uploaded in hopsworks
+    * It should be run often, at least once a day
+1. `feature-past-pipeline`
+    * This pipelines scrapes results of games
+    * It should be run weekly before model is retrained
+1. The ui
+    * UI requires `training-pipeline` and `feature-upcoming-pipeline`
+
+`feature-upcoming-pipeline` and `feature-past-pipeline` require selenium and webdriver.

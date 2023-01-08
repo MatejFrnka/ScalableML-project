@@ -1,9 +1,6 @@
-import pickle
-from pathlib import Path
-
 from consts import *
 import hopsworks
-from scrape_oddsportal import scrape_historical
+from utils.scrape_oddsportal import scrape_historical
 
 from utils.Hopsworks import get_football_featureview, get_football_featuregroup
 
