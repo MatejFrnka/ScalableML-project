@@ -2,7 +2,7 @@ from consts import *
 import hopsworks
 from utils.ScrapeOddsportal import scrape_historical
 
-from utils.Hopsworks import get_football_featureview, get_football_featuregroup
+from utils.Hopsworks import get_football_featuregroup
 
 LOCAL = False
 
@@ -30,13 +30,10 @@ def run_scrape():
     # fs is a reference to the Hopsworks Feature Store
     fs = project.get_feature_store()
     # # get featureview
-    feature_view = get_football_featureview(fs)
     fg_football = get_football_featuregroup(fs)
-
-    feature_view.delete_all_training_datasets()
-    historical, _ = feature_view.training_data()
-
-
+    query = fg_football.select_all()
+    print("Executing query")
+    historical = query.read()
 
     country, league = 'england', 'premier-league'
     past = scrape_historical(country, league, historical)

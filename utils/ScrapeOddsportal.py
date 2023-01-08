@@ -376,6 +376,7 @@ def scrape_upcoming(country, league, existing_matches):
 
 
 def scrape_historical(country, league, historical_df):
+    historical_df = historical_df.sort_values(by='date')
     historical_df = historical_df[historical_df['country'] == country]
     historical_df = historical_df[historical_df['league'] == league]
     latest_match_df = historical_df[-1:]

@@ -1,4 +1,5 @@
 import modal
+from tensorflow.python.keras.optimizer_v2.adam import Adam
 from consts import X_COLUMNS, Y_COLUMNS, X_SCALE_COLUMNS
 from utils.BackTest import Games, Evaluator
 
@@ -15,9 +16,12 @@ if not LOCAL:
                          "scikit-learn", "matplotlib")
         ),
     )
+
+
     @stub.function(schedule=modal.Period(days=7), secret=modal.Secret.from_name("HOPSWORKS_API_KEY"))
     def run():
         train_model()
+
 
 def train_model():
     import json
@@ -77,17 +81,14 @@ def train_model():
         model.add(Dropout(0.2))
         model.add(Dense(800, activation='relu'))
         model.add(Dropout(0.2))
-        model.add(Dense(800, activation='relu'))
-        model.add(Dropout(0.2))
+        # model.add(Dense(800, activation='relu'))
+        # model.add(Dropout(0.2))
         model.add(Dense(3, activation='softmax'))
         model.summary()
-        lr_schedule = tensorflow.keras.optimizers.schedules.ExponentialDecay(
-            initial_learning_rate=1e-2,
-            decay_steps=10000,
-            decay_rate=0.9)
-        optimizer = tensorflow.keras.optimizers.SGD(learning_rate=lr_schedule)
+
+        optimizer = Adam()
         model.compile(loss='mse', optimizer=optimizer, metrics=['mse', 'mae'])
-        history = model.fit(X_train, y_train, epochs=50, batch_size=400, verbose=1, validation_data=(X_valid, y_valid))
+        history = model.fit(X_train, y_train, epochs=150, batch_size=200, verbose=1, validation_data=(X_valid, y_valid))
         plot_history(history, metrics_directory)
         return scaler, model
 
@@ -149,7 +150,7 @@ def train_model():
     # no labels are set in the feature view
     feature_view.delete_all_training_datasets()
     train, _ = feature_view.training_data()
-    evaluator = Evaluator(0.7)
+    evaluator = Evaluator(0.9)
 
     # measure performance of last year
     metrics, money_chart, average_winners = test_performance(feature_view, evaluator, 365)
