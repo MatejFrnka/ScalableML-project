@@ -79,7 +79,7 @@ def train_model():
         model.add(Dropout(0.2))
         model.add(Dense(800, activation='relu'))
         model.add(Dropout(0.2))
-        model.add(Dense(3, activation='linear'))
+        model.add(Dense(3, activation='softmax'))
         model.summary()
         lr_schedule = tensorflow.keras.optimizers.schedules.ExponentialDecay(
             initial_learning_rate=1e-2,

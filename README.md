@@ -21,20 +21,6 @@ In this project, we try to further improve the odds offered by Pinnacle. This is
 
 ## 2. The Data
 
-1. Choose a real-world data source that is updated regularly (once
-min/hour/day/week).
-2. Define the prediction problem that you will solve based on data from the
-data source.
-3. Define a data model with the features and label(s) or your data.
-4. Build a feature pipeline to create the features/label(s) from the raw data
-5. Build a training pipeline to train a model using your features/label(s)
-6. Build an inference pipeline to make predictions using new data and build a
-User Interface to communicate the results to a user
-
- Include in the README.md file:
-○ a description of your prediction service its the data source
-○ a public URL for the UI for your project (e.g., a Hugging Face Spaces URL).
-
 As previously stated, all data used for this project has been scraped from Oddsportal.com. The scraped dataset includes 150.000 football games, the results and bookmakers odds. From these 150.000 football games, only 70.000 include the odds given by Pinnacle. Since our goal of this project is to try to beat specifically Pinnacle, only these 70.000 games are used. A screenshot of the data used for the project can be seen below:
 
 ![alt text](./images/id2223%20project%20data.png "Football Dataset")
