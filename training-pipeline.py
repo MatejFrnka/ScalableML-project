@@ -79,7 +79,7 @@ def train_model():
         model.add(Dropout(0.2))
         model.add(Dense(800, activation='relu'))
         model.add(Dropout(0.2))
-        model.add(Dense(3, activation='linear'))
+        model.add(Dense(3, activation='softmax'))
         model.summary()
         model.compile(loss='mse', optimizer='adam', metrics=['mse', 'mae'])
         history = model.fit(X_train, y_train, epochs=20, batch_size=400, verbose=1, validation_data=(X_valid, y_valid))
