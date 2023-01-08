@@ -1,6 +1,6 @@
 from consts import *
 import hopsworks
-from utils.scrape_oddsportal import scrape_historical
+from utils.ScrapeOddsportal import scrape_historical
 
 from utils.Hopsworks import get_football_featureview, get_football_featuregroup
 

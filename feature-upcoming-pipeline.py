@@ -4,7 +4,7 @@ from pathlib import Path
 from consts import *
 import hopsworks
 from tensorflow.python.keras import models
-from utils.scrape_oddsportal import scrape_upcoming
+from utils.ScrapeOddsportal import scrape_upcoming
 
 from utils.BackTest import *
 from utils.Hopsworks import get_football_featureview
