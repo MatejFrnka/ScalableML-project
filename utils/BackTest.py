@@ -47,11 +47,11 @@ class Evaluator:
         """
         max = np.argmax([diff_h, diff_d, diff_a])
         res = [False, False, False]
-        if [diff_h, diff_d, diff_a][max] > self.margin:
+        if [diff_h, diff_d, diff_a][max] > 0.05:
             res[max] = True
         return res
 
-    def generate_buy_signals(self, predicted_percentage):
+    def generate_buy_signals(self, predicted_percentage, pinnacle_percentage):
         """
 
         :param given_percentage: Games object containing NOT NORMALIZED percentage (sum of home, draw, away > 1) offered by betting site (e.g. Pinnacle)
@@ -60,9 +60,9 @@ class Evaluator:
         :return: Returns Game object containing arrays of True/False for game.home, game.draw, game.away. If any of the arrays is True, it means we should be on given result.
         """
 
-        h = predicted_percentage.home
-        d = predicted_percentage.draw
-        a = predicted_percentage.away
+        h = predicted_percentage.home - pinnacle_percentage.home
+        d = predicted_percentage.draw - pinnacle_percentage.draw
+        a = predicted_percentage.away - pinnacle_percentage.away
 
         # run the buy_function for every game,
         buy = [self.buy_function(*v) for v in zip(h,d, a)]
