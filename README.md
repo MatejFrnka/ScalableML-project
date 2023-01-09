@@ -19,6 +19,8 @@ For this project, we set out to beat online bookmakers in prediction outcomes of
 
 In this project, we try to further improve the odds offered by Pinnacle. This is done by scraping the results of football games, as well as the odds offered by Pinnacle, creating new features using this data and training a Neural Network for the task. All data used in the project is scraped from Oddsportal (found here: https://www.oddsportal.com/). The data as well as the trained model is uploaded to Hopsworks. Hopsworks is then connected with Streamlit hosting on which a Streamlit UI is built to showcase the performance of the model (found here: https://matejfrnka-scalableml-ui-app-mzih9s.streamlit.app/). In this UI, the performance of the model is shown both on offline test data (a hold outset of all of the data), as well as real-time predictions on upcoming matches and evaluation of those predictions once the match is finished. The real-time part, making predictions on upcoming matches and evaluating the results after the match is over, is achieved by continuously scraping Oddsportal for upcoming matches as well as contiuously updating the results of played matches by running the scraper on Modal. Once a new upcoming match is found on Oddsportal by Modal scraping it, Modal loads the model from Hopsworks, makes predictions (interference) and uploads the upcoming match and prediction to Hopsworks. When the game has been played, again Modal scrapes the results of the game, and evaluates the performance. Lastly, the Streamlit app grabs all predictions and performance of the model and displays it in the Streamlit UI. The full Github repository can be found here: https://github.com/MatejFrnka/ScalableML-project.
 
+To run our code, please see **6. How to run**!
+
 ## 2. The Data
 
 As previously stated, all data used for this project has been scraped from Oddsportal.com. The scraped dataset includes 150.000 football games, the results and bookmakers odds. From these 150.000 football games, only 70.000 include the odds given by Pinnacle. Since our goal of this project is to try to beat specifically Pinnacle, only these 70.000 games are used. A screenshot of the data used for the project can be seen below:
@@ -60,11 +62,21 @@ For some extra clarification, the Shock feature was calculated by taking into ac
 
 ## 4. Modeling
 
-One of our goals of this project was to get practical experience with Neural Networks and therefore a Multi-layer Perpectron Neural Network was chosen as the model for the task. Our first step of modeling was to drop the first 10.000 rows of the data, the oldest matches. This was done because the added features had not yet converged to appropriate values for the model to train on and while testing, showed to decrease the models performance. The data was then split into training, validation and testing sets. Then, the data was scaled using Scikit-learn MaxAbsScaler, which was fitted on the training data and then used on all three partitions.    
+One of our goals of this project was to get practical experience with Neural Networks and therefore a Multi-layer Perpectron (MLP) Neural Network was chosen as the model for the task.  
 
-The architecture of the MLP Neural Network was 31 input neurons, three hidden layers of 800 neurons each, and an output layer of 3 neurons (31x800x800x800x3). The first four layers used Relu as activation function and the output layer a softmax. The hidden layers were trained using dropout of 20%. The loss function of the neural network as configured to be Mean Squared Error and the optimizer was Adam.
+Before starting experimenting with different configurations of the neural network, we did some data preprocessing. This started with creating target labels for the data. We used binary representation of the three outcomes, home win, draw, and away win ([1,0,0] for home win, [0,1,0] for draw and [0,0,1] for away win). Even though this task is a Multi-class Classification, we found that approaching the problem as a regression problem produced better results. For this reason, we use Mean Squared Error (MSE) as our loss function. The next step was to remove the oldest data, the oldest 10.000 matches. This was done because our added features had not converged to appropriate values yet, and the removal of data again improved the results. The next step was to scale the data using Scikit-learn's MaxAbsScaler. The scaler was fitted on the training data and then used to transform the training, validation and testing data.  
 
-## 5. How to run
+The next step was to start testing different architectures of the MLP neural network. We tried different different number of hidden layers and different number of neurons in said layers. This was done in combination with testing different learning rates and applying regularization techniques such as Dropout regularization. The one thing that stayed constant was using the optimizer Adam, Relu as the activation function on the hidden layers and Softmax as the activation function on the output layer.  
+
+Our final architecture consisted of 31 input neurons, three hidden layers of size 800 neurons each, and an output layer of 3 neruons (31x800x800x800x3).
+
+## 5. Evaluation
+
+To evaluate the performance of our model, we simulated betting on the testing data. This simulation consisted of only placing bets on matches if our model believed the chance of a team winning the game was more than 5% high than the odds, given by Pinnacle, implied. We used a "flat bet" betting strategi, meaning we always bet 1 unit on each match. A plot of the Return of Investment (ROI) over games can be seen below:
+
+![alt text](./images/id2223%20roi.png "Football Dataset")
+
+## 6. How to run
 Run pipelines in the following order:
 
 1. `feature-pipeline-initial`
