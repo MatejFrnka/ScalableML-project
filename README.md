@@ -80,7 +80,7 @@ The model placed roughly 1.000 bets on 10.000 matches and ended up with a 7% ret
 
 ## 6. Conclusions
 
-This project included many challenges. To name a few, scraping Oddsportal turned out to be nothing short than a nightmare. It was very time consuming having to browse individual webpages for each match. These pages also included Javascripts that had to be run to retrieve the required information. Setting up the scraper on Modal was also a challenge which included building a custom docker file with the necessary programs installed. The result of the model, was as expected when we started the project, not very good - the online bookmakers are doing a very good job!
+This project included many challenges. To name a few, scraping Oddsportal turned out to be nothing short than a nightmare. It was very time consuming having to browse individual webpages for each match. These pages also included Javascripts that had to be run to retrieve the required information. Setting up the scraper on Modal was also a challenge which included building a custom docker file with the necessary programs installed. Coming up with meaningful features was also hard since none of us had extensive knowledge about football from before the project. The result of the model, was as expected when we started the project, not very good - the online bookmakers are doing a very good job!
 
 All in all, the project was very challenging and we learnt a lot!
 
