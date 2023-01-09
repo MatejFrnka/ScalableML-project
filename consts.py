@@ -1,5 +1,5 @@
-FW_VERSION = 6
-FG_VERSION = 9
+FW_VERSION = 7
+FG_VERSION = 10
 FG_UPCOMING_VERSION = 3
 
 HomeTeam = 'h_team'  # H_team
