@@ -30,7 +30,7 @@ def train_model():
     from tensorflow.python.keras.layers import Dense
     from tensorflow.python.keras.models import Sequential
     from keras.layers import Dropout
-    from sklearn.preprocessing import MaxAbsScaler
+    from sklearn.preprocessing import MaxAbsScaler, MinMaxScaler
     import pickle
     import matplotlib.pyplot as plt
     from pathlib import Path
@@ -69,7 +69,7 @@ def train_model():
         X_valid, y_valid = df_valid[X_COLUMNS].copy(), df_valid[Y_COLUMNS].copy()
 
         # scale scalable columns
-        scaler = MaxAbsScaler()
+        scaler = MinMaxScaler()
         scaler.fit(X_train[X_SCALE_COLUMNS])
         X_train[X_SCALE_COLUMNS] = scaler.transform(X_train[X_SCALE_COLUMNS])
         X_valid[X_SCALE_COLUMNS] = scaler.transform(X_valid[X_SCALE_COLUMNS])
@@ -78,9 +78,9 @@ def train_model():
         model.add(Dense(len(X_train.columns) + 1, input_dim=len(X_train.columns),
                         kernel_initializer='normal', activation='relu'))
         model.add(Dense(800, activation='relu'))
-        model.add(Dropout(0.2))
+        # model.add(Dropout(0.2))
         model.add(Dense(800, activation='relu'))
-        model.add(Dropout(0.2))
+        # model.add(Dropout(0.2))
         # model.add(Dense(800, activation='relu'))
         # model.add(Dropout(0.2))
         model.add(Dense(3, activation='softmax'))
@@ -88,7 +88,7 @@ def train_model():
 
         optimizer = Adam()
         model.compile(loss='mse', optimizer=optimizer, metrics=['mse', 'mae'])
-        history = model.fit(X_train, y_train, epochs=150, batch_size=200, verbose=1, validation_data=(X_valid, y_valid))
+        history = model.fit(X_train, y_train, epochs=50, batch_size=1000, verbose=1, validation_data=(X_valid, y_valid))
         plot_history(history, metrics_directory)
         return scaler, model
 
