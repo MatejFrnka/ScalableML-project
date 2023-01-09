@@ -19,7 +19,7 @@ For this project, we set out to beat online bookmakers in prediction outcomes of
 
 In this project, we try to further improve the odds offered by Pinnacle. This is done by scraping the results of football games, as well as the odds offered by Pinnacle, creating new features using this data and training a Neural Network for the task. All data used in the project is scraped from Oddsportal (found here: https://www.oddsportal.com/). The data as well as the trained model is uploaded to Hopsworks. Hopsworks is then connected with Streamlit hosting on which a Streamlit UI is built to showcase the performance of the model (found here: https://matejfrnka-scalableml-ui-app-mzih9s.streamlit.app/). In this UI, the performance of the model is shown both on offline test data (a hold outset of all of the data), as well as real-time predictions on upcoming matches and evaluation of those predictions once the match is finished. The real-time part, making predictions on upcoming matches and evaluating the results after the match is over, is achieved by continuously scraping Oddsportal for upcoming matches as well as contiuously updating the results of played matches by running the scraper on Modal. Once a new upcoming match is found on Oddsportal by Modal scraping it, Modal loads the model from Hopsworks, makes predictions (interference) and uploads the upcoming match and prediction to Hopsworks. When the game has been played, again Modal scrapes the results of the game, and evaluates the performance. Lastly, the Streamlit app grabs all predictions and performance of the model and displays it in the Streamlit UI. The full Github repository can be found here: https://github.com/MatejFrnka/ScalableML-project.
 
-To run our code, please see **6. How to run**!
+To run our code, please see **7. How to run**!
 
 ## 2. The Data
 
@@ -76,7 +76,15 @@ To evaluate the performance of our model, we simulated betting on the testing da
 
 ![alt text](./images/id2223%20roi.png "Football Dataset")
 
-## 6. How to run
+The model placed roughly 1.000 bets on 10.000 matches and ended up with a 7% return of investment (ROI). It should be noted that the model also had a drawdown of -40% before a runup to +40% before ending on the final ROI.
+
+## 6. Conclusions
+
+This project included many challenges. To name a few, scraping Oddsportal turned out to be nothing short than a nightmare. It was very time consuming having to browse individual webpages for each match. These pages also included Javascripts that had to be run to retrieve the required information. Setting up the scraper on Modal was also a challenge which included building a custom docker file with the necessary programs installed. The result of the model, was as expected when we started the project, not very good - the online bookmakers are doing a very good job!
+
+All in all, the project was very challenging and we learnt a lot!
+
+## 7. How to run
 Run pipelines in the following order:
 
 1. `feature-pipeline-initial`
