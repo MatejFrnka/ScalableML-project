@@ -23,7 +23,7 @@ To run our code, please see **7. How to run**!
 
 ## 2. The Data
 
-As previously stated, all data used for this project has been scraped from Oddsportal.com. The scraped dataset includes 150.000 football games, the results and bookmakers odds. From these 150.000 football games, only 70.000 include the odds given by Pinnacle. Since our goal of this project is to try to beat specifically Pinnacle, only these 70.000 games are used. A screenshot of the data used for the project can be seen below:
+As previously stated, all data used for this project has been scraped from Oddsportal.com. The scraped dataset includes 150.000 football games, the results and bookmakers odds. From these 150.000 football games, only 111.000 include the odds given by Pinnacle. Since our goal of this project is to try to beat specifically Pinnacle, only these 111.000 games are used. A screenshot of the scraped data used for the project can be seen below:
 
 ![alt text](./images/id2223%20project%20data.png "Football Dataset")
 
@@ -68,15 +68,15 @@ Before starting experimenting with different configurations of the neural networ
 
 The next step was to start testing different architectures of the MLP neural network. We tried different different number of hidden layers and different number of neurons in said layers. This was done in combination with testing different learning rates and applying regularization techniques such as Dropout regularization. The one thing that stayed constant was using the optimizer Adam, Relu as the activation function on the hidden layers and Softmax as the activation function on the output layer.  
 
-Our final architecture consisted of 31 input neurons, three hidden layers of size 800 neurons each, and an output layer of 3 neruons (31x800x800x800x3).
+Our final architecture consisted of 31 input neurons, two hidden layers of size 800 neurons each, and an output layer of 3 neruons (31x800x800x3).
 
 ## 5. Evaluation
 
-To evaluate the performance of our model, we simulated betting on the testing data. This simulation consisted of only placing bets on matches if our model believed the chance of a team winning the game was more than 5% high than the odds, given by Pinnacle, implied. We used a "flat bet" betting strategi, meaning we always bet 1 unit on each match. A plot of the Return of Investment (ROI) over games can be seen below:
+To evaluate the performance of our model, we simulated betting on the testing data. This simulation consisted of only placing bets on matches if our model believed the chance of a team winning the game was more than 80%. We used a "flat bet" betting strategi, meaning we always bet 1 unit on each match. A plot of the Return of Investment (ROI) over games can be seen below:
 
 ![alt text](./images/id2223%20roi.png "Football Dataset")
 
-The model placed roughly 1.000 bets on 10.000 matches and ended up with a 7% return of investment (ROI). It should be noted that the model also had a drawdown of -40%, then a runup to +40%, before ending on the final ROI.
+The model placed roughly 200 bets on 10.000 matches and ended up with a -2.4% return of investment (ROI).
 
 ## 6. Conclusions
 
