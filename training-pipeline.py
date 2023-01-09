@@ -29,7 +29,6 @@ def train_model():
     import tensorflow
     from tensorflow.python.keras.layers import Dense
     from tensorflow.python.keras.models import Sequential
-    from keras.layers import Dropout
     from sklearn.preprocessing import MaxAbsScaler, MinMaxScaler
     import pickle
     import matplotlib.pyplot as plt
@@ -101,13 +100,14 @@ def train_model():
             start_time=0,
             end_time=datetime.now() - timedelta(days=days_back),
         )
-
+        df_train = df_train.sort_values(by='date')
+        df_train = df_train.reset_index(drop=True)
         # download data from last year
         df_test = feature_view.get_batch_data(
             start_time=datetime.now() - timedelta(days=days_back),
             end_time=datetime.now()
         )
-
+        df_test = df_test.sort_values(by='date')
         scaler, model = train_model(df_train, 0.75)
 
         # scaler, model = train_model(df_train, df_valid)
@@ -150,7 +150,7 @@ def train_model():
     # no labels are set in the feature view
     feature_view.delete_all_training_datasets()
     train, _ = feature_view.training_data()
-    evaluator = Evaluator(0.9)
+    evaluator = Evaluator(0.8)
 
     # measure performance of last year
     metrics, money_chart, average_winners = test_performance(feature_view, evaluator, 365)

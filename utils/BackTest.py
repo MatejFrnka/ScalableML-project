@@ -60,12 +60,12 @@ class Evaluator:
         :return: Returns Game object containing arrays of True/False for game.home, game.draw, game.away. If any of the arrays is True, it means we should be on given result.
         """
 
-        h = predicted_percentage.home
-        d = predicted_percentage.draw
-        a = predicted_percentage.away
+        diff_h = predicted_percentage.home
+        diff_d = predicted_percentage.draw
+        diff_a = predicted_percentage.away
 
         # run the buy_function for every game,
-        buy = [self.buy_function(*v) for v in zip(h,d, a)]
+        buy = [self.buy_function(*v) for v in zip(diff_h, diff_d, diff_a)]
         return Games(*[np.array(k) for k in zip(*buy)])
 
     @staticmethod
