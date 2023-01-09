@@ -68,7 +68,7 @@ Before starting experimenting with different configurations of the neural networ
 
 The next step was to start testing different architectures of the MLP neural network. We tried different different number of hidden layers and different number of neurons in said layers. This was done in combination with testing different learning rates and applying regularization techniques such as Dropout regularization. The one thing that stayed constant was using the optimizer Adam, Relu as the activation function on the hidden layers and Softmax as the activation function on the output layer.  
 
-Our final architecture consisted of 31 input neurons, two hidden layers of size 800 neurons each, and an output layer of 3 neruons (31x800x800x3).
+Our final architecture consisted of 40 input neurons, two hidden layers of size 800 neurons each, and an output layer of 3 neruons (40x800x800x3).
 
 ## 5. Evaluation
 
