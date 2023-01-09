@@ -76,7 +76,7 @@ To evaluate the performance of our model, we simulated betting on the testing da
 
 ![alt text](./images/id2223%20roi.png "Football Dataset")
 
-The model placed roughly 1.000 bets on 10.000 matches and ended up with a 7% return of investment (ROI). It should be noted that the model also had a drawdown of -40% before a runup to +40% before ending on the final ROI.
+The model placed roughly 1.000 bets on 10.000 matches and ended up with a 7% return of investment (ROI). It should be noted that the model also had a drawdown of -40%, then a runup to +40%, before ending on the final ROI.
 
 ## 6. Conclusions
 
