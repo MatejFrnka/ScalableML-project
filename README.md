@@ -1,7 +1,10 @@
-# **<p style="text-align: center;">Beating the Bookies using Neural Networks</p>**
+```diff
+- The scraper no longer works because the scraped website has been changed
+```
+
+# **<p style="text-align: center;font-style: italic;">Beating the Bookies using Neural Networks</p>**
 ## **<p style="text-align: center;">ID2223 Project</p>**
 ## **<p style="text-align: center;">HT 2022</p>**  
-
 
 
 <br/><br/>
